@@ -1,0 +1,224 @@
+{
+  "name": "q1",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Student info",
+        "formDescription": "All information is confidential and will only be used for school records and emergency contact purposes.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Student name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email adress",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Age",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "selected course ",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "English "
+                  },
+                  {
+                    "option": "Arabic"
+                  },
+                  {
+                    "option": "Chinees "
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Additional note",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "808eb271-cd22-44e4-81f7-3ac01d3b898c",
+      "name": "On form submission"    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input data from the form submission\nconst inputData = $input.first().json;\n\nconst studentName = inputData['Student name'] || '';\nconst age = inputData['Age'] || 0;\n\nlet status = 'Accepted';\nlet reason = 'All criteria met.';\nconst reasons = [];\n\n// Validate student name (at least 3 characters)\nif (!studentName || studentName.trim().length < 3) {\n  status = 'Rejected';\n  reasons.push('Name must contain at least 3 characters.');\n}\n\n// Validate age (between 10 and 18)\nif (typeof age !== 'number' || age < 10 || age > 18) {\n  status = 'Rejected';\n  reasons.push('Age must be a number between 10 and 18.');\n}\n\n// Combine reasons if there are any\nif (reasons.length > 0) {\n  reason = reasons.join(' ');\n}\n\n// Return data in n8n's expected format\nreturn [\n  {\n    json: {\n      'Student name': studentName,\n      'Email address': inputData['Email address'],\n      'Age': age,\n      'Selected course': inputData['selected cour...'],\n      'Additional note': inputData['Additional note'],\n      'Validation Status': status,\n      'Validation Reason': reason,\n      'submittedAt': inputData['submittedAt']\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        0
+      ],
+      "id": "a31bc1bb-741c-41fe-bd54-79bf92083aaa",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet"        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "form submit"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Student name": "={{ $json['Student name'] }}",
+            "Email adress": "={{ $('On form submission').item.json['Email adress'] }}",
+            "Age": "={{ $json.Age }}",
+            "selected course ": "={{ $('On form submission').item.json['selected course '] }}",
+            "note": "={{ $json['Additional note'] }}",
+            "Statuse": "={{ $json['Validation Status'] }}",
+            "Submitted at": "={{ $json.submittedAt }}",
+            "validation": "={{ $json['Validation Reason'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Student name",
+              "displayName": "Student name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email adress",
+              "displayName": "Email adress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Age",
+              "displayName": "Age",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "selected course ",
+              "displayName": "selected course ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "note",
+              "displayName": "note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Statuse",
+              "displayName": "Statuse",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validation",
+              "displayName": "validation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Submitted at",
+              "displayName": "Submitted at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        0
+      ],
+      "id": "4b759c23-e6a1-4b50-90cd-c8dd76aeb890",
+      "name": "Append row in sheet",
+      "credentials": {
+
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "kp504I1PYIp7xheP",
+  "tags": []
+}
